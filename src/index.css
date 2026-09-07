@@ -41,8 +41,7 @@ button { cursor: pointer; }
 a { color: inherit; }
 
 .site-shell { min-height: 100dvh; overflow-x: hidden; }
-.top-nav { height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 0 clamp(20px, 5vw, 76px); border-bottom: 1px solid hsl(var(--border)); background: rgba(242,232,208,.92); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 40; }
-.logo { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; font-family: var(--app-font-display); font-size: 19px; font-weight: 700; letter-spacing: -.06em; }
+.top-nav { height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 0 clamp(20px, 5vw, 76px); border-bottom: 1px solid hsl(var(--border)); background: rgba(242,232,208,.92); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 40; }
 .logo-mark { width: 31px; height: 31px; border-radius: 9px 9px 9px 3px; display: grid; place-items: center; color: var(--paper); background: var(--coral); transform: rotate(-7deg); }
 .logo-caption { display: block; color: #8a7458; font: 9px var(--app-font-mono); letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; }
 .main-nav { display: flex; align-items: center; gap: clamp(14px, 2.5vw, 34px); margin-left: auto; margin-right: 12px; }

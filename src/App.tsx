@@ -25,6 +25,9 @@ import {
   X,
 } from "lucide-react";
 import { CATEGORIES, CATEGORY_INFO, money, PRODUCTS, type CartItem, type Order, type Product } from "@/lib/store";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
+import LoginPage from "@/pages/login";
+import SignupPage from "@/pages/signup";
 
 type StoreContextValue = {
   cart: CartItem[];
@@ -127,6 +130,7 @@ function useStore() {
 function Header() {
   const [location, navigate] = useLocation();
   const { cart, wishlist } = useStore();
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -171,6 +175,11 @@ function Header() {
             <ShoppingBag size={18} />
             {itemCount > 0 && <span className="cart-count" data-testid="text-cart-count">{itemCount}</span>}
           </Link>
+          {user ? (
+            <button className="button button-quiet" onClick={logout} data-testid="button-logout">Logout ({user.name.split(" ")[0]})</button>
+          ) : (
+            <Link href="/login" className="button button-quiet" data-testid="link-login">Login</Link>
+          )}
           <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu" data-testid="button-toggle-menu">
             {menuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -195,6 +204,8 @@ function Toast() {
 
 function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const { addToCart, wishlist, toggleWishlist } = useStore();
+  const { user } = useAuth();
+  const [, navigate] = useLocation();
   const saved = wishlist.includes(product.id);
   const discount = product.originalPrice ? Math.round(100 - (product.price / product.originalPrice) * 100) : 0;
   return (
@@ -218,7 +229,7 @@ function ProductCard({ product, index = 0 }: { product: Product; index?: number 
           <button
             type="button"
             className="quick-add"
-            onClick={(event) => { event.preventDefault(); addToCart(product.id, 1); }}
+            onClick={(event) => { event.preventDefault(); if (!user) { navigate("/login"); return; } addToCart(product.id, 1); }}
             data-testid={`button-quick-add-${product.id}`}
           >
             <ShoppingBag size={13} /> Quick add
@@ -412,6 +423,8 @@ function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const product = PRODUCTS.find((item) => item.id === id);
   const { addToCart, wishlist, toggleWishlist } = useStore();
+  const { user } = useAuth();
+  const [, navigate] = useLocation();
   const [quantity, setQuantity] = useState(1);
   if (!product) return <NotFound />;
   const saved = wishlist.includes(product.id);
@@ -438,7 +451,7 @@ function ProductPage() {
             <span style={{ color: "var(--muted-foreground)", fontSize: 11 }}>Choose quantity</span>
           </div>
           <div className="detail-actions">
-            <button className="button button-coral" onClick={() => addToCart(product.id, quantity)} disabled={product.stock < 1} data-testid="button-add-to-cart">Add to bag <ShoppingBag size={15} /></button>
+            <button className="button button-coral" onClick={() => { if (!user) { navigate("/login"); return; } addToCart(product.id, quantity); }} disabled={product.stock < 1} data-testid="button-add-to-cart">Add to bag <ShoppingBag size={15} /></button>
             <button className={`button button-outline ${saved ? "saved" : ""}`} onClick={() => toggleWishlist(product.id)} data-testid="button-detail-wishlist"><Heart size={15} fill={saved ? "currentColor" : "none"} /> {saved ? "Saved" : "Save"}</button>
           </div>
           <div className="trust-badge-row">
@@ -548,11 +561,11 @@ function Footer() {
 }
 
 function AppShell() {
-  return <div className="site-shell"><Header /><Switch><Route path="/" component={HomePage} /><Route path="/store" component={StorePage} /><Route path="/products/:id" component={ProductPage} /><Route path="/cart" component={CartPage} /><Route component={NotFound} /></Switch><Footer /><Toast /></div>;
+  return <div className="site-shell"><Header /><Switch><Route path="/" component={HomePage} /><Route path="/store" component={StorePage} /><Route path="/products/:id" component={ProductPage} /><Route path="/cart" component={CartPage} /><Route path="/login" component={LoginPage} /><Route path="/signup" component={SignupPage} /><Route component={NotFound} /></Switch><Footer /><Toast /></div>;
 }
 
 function App() {
-  return <StoreProvider><AppShell /></StoreProvider>;
+  return <AuthProvider><StoreProvider><AppShell /></StoreProvider></AuthProvider>;
 }
 
 export default App;
